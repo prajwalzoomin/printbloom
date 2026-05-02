@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrintBloom - Secure Checkout</title>
+    <link rel="stylesheet" href="css/layout.css">
+    <style>
+        .summary-box {
+            background: rgba(0, 123, 255, 0.05);
+            border: 1px solid rgba(0, 123, 255, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.8rem;
+            font-size: 1.05rem;
+        }
+
+        .summary-row.total {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #007bff;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            padding-top: 1rem;
+            margin-top: 1rem;
+        }
+
+        .secure-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: #28a745;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .cancel-target {
+            background: transparent;
+            color: #dc3545;
+            text-decoration: underline;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: color 0.3s;
+        }
+
+        .cancel-target:hover {
+            color: #a71d2a;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>PrintBloom</h1>
+        <nav>
+            <a href="upload.html">Upload</a>
+            <a href="queue.html">Live Queue</a>
+            <a href="admin.html">Admin</a>
+        </nav>
+    </header>
+    <main class="checkout-container">
+        <div class="glass-card" id="checkoutCard">
+            <h2>Order Summary</h2>
+            <p>Please review your printing details before locking in your checkout.</p>
+
+            <div class="summary-box">
+                <div class="summary-row">
+                    <span style="color:#666;">Document:</span>
+                    <span id="sumFile" style="font-weight:600;">--</span>
+                </div>
+                <div class="summary-row">
+                    <span style="color:#666;">Official Order ID:</span>
+                    <span id="sumOrder" style="font-weight:600;">--</span>
+                </div>
+                <div class="summary-row">
+                    <span style="color:#666;">Color Strategy:</span>
+                    <span id="sumType" style="font-weight:600;">--</span>
+                </div>
+                <div class="summary-row">
+                    <span style="color:#666;">Number of Copies:</span>
+                    <span id="sumCopies" style="font-weight:600;">--</span>
+                </div>
+                <div class="summary-row">
+                    <span style="color:#666;">Print Sides:</span>
+                    <span id="sumDuplex" style="font-weight:600;">--</span>
+                </div>
+
+                <div class="summary-row total">
+                    <span>Total Amount Payable:</span>
+                    <span id="sumCost">₹ 0.00</span>
+                </div>
+            </div>
+
+            <button id="payBtn" class="primary-btn">Initialize Razorpay Gateway</button>
+            <br>
+            <button id="cancelBtn" class="cancel-target">Drop this order</button>
+
+            <div class="secure-badge">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                256-bit Encrypted Checkouts
+            </div>
+        </div>
+    </main>
+
+    <!-- Essential Razorpay Injection Script -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="js/checkout.js"></script>
+</body>
+
+</html>

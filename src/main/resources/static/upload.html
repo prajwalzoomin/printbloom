@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrintBloom - Upload</title>
+    <link rel="stylesheet" href="css/layout.css">
+</head>
+
+<body>
+    <header>
+        <h1>PrintBloom</h1>
+        <nav>
+            <a href="upload.html" class="active">Upload</a>
+            <a href="queue.html">Live Queue</a>
+            <a href="admin.html">Admin</a>
+        </nav>
+    </header>
+
+    <main class="upload-container">
+        <div class="glass-card">
+            <h2>Upload your Document</h2>
+            <p>Select a PDF file to begin your dynamic printing order.</p>
+
+            <form id="uploadForm">
+                <div class="drop-zone" id="dropZone">
+                    <span class="drop-zone__prompt">Drag & Drop PDF here or Click to Browse</span>
+                    <input type="file" id="pdfFile" class="drop-zone__input" accept="application/pdf" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="printType">Print Color Strategy</label>
+                    <select id="printType" class="modern-select">
+                        <option value="BLACK_WHITE">Grayscale / Black & White (₹2 / pg)</option>
+                        <option value="COLOR">Full Color Premium (₹5 / pg)</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="display: flex; gap: 1rem;">
+                    <div style="flex: 1;">
+                        <label for="copies">Number of Copies</label>
+                        <input type="number" id="copies" class="modern-input" min="1" value="1"
+                            style="width: 100%; padding: 0.8rem; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label for="isDuplex">Print Sides</label>
+                        <select id="isDuplex" class="modern-select">
+                            <option value="false">Single Sided</option>
+                            <option value="true">Double Sided (Front & Back)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="primary-btn" id="submitBtn">Calculate Estimate</button>
+            </form>
+
+            <div id="loadingIndicator" class="hidden">
+                <div class="spinner"></div>
+                <p>Analyzing PDF page counts...</p>
+            </div>
+
+            <div id="errorMessage" class="error-text hidden"></div>
+        </div>
+    </main>
+
+    <script src="js/upload.js"></script>
+</body>
+
+</html>

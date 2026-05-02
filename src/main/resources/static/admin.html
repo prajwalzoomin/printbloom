@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrintBloom - Admin Console</title>
+    <link rel="stylesheet" href="css/layout.css">
+    <style>
+        /* Override specifically for the admin panel to allow wide tables */
+        .glass-card {
+            max-width: 900px;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .admin-table th,
+        .admin-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .admin-table th {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .action-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-right: 5px;
+            transition: transform 0.1s;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .action-btn.success {
+            background: #28a745;
+        }
+
+        .action-btn.danger {
+            background: #dc3545;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>PrintBloom Administrator</h1>
+        <nav>
+            <a href="upload.html">Upload</a>
+            <a href="queue.html">Live Queue</a>
+            <a href="admin.html" class="active">Admin</a>
+        </nav>
+    </header>
+    <main class="admin-container">
+        <div class="glass-card">
+            <h2>Admin Master Console</h2>
+            <div style="overflow-x: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Filename</th>
+                            <th>Cost</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminBody">
+                        <!-- Javascript will inject rows -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+    <script src="js/admin.js"></script>
+</body>
+
+</html>

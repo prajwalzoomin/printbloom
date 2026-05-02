@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrintBloom - Live Queue</title>
+    <link rel="stylesheet" href="css/layout.css">
+    <style>
+        .queue-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .queue-item {
+            background: rgba(255, 255, 255, 0.8);
+            margin: 10px 0;
+            padding: 15px 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+
+        .queue-item:hover {
+            transform: translateX(5px);
+        }
+
+        .queue-pos {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .queue-stats {
+            text-align: right;
+        }
+
+        .badge {
+            background: #007bff;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>PrintBloom</h1>
+        <nav>
+            <a href="upload.html">Upload</a>
+            <a href="queue.html" class="active">Live Queue</a>
+            <a href="admin.html">Admin</a>
+        </nav>
+    </header>
+    <main class="queue-container">
+        <div class="glass-card">
+            <h2>Live Print Queue</h2>
+            <p>Your document's real-time position in the printing pipeline.</p>
+            <ul id="queueList" class="queue-list">
+                <!-- Javascript will inject queue items here dynamically -->
+            </ul>
+        </div>
+    </main>
+    <script src="js/queue.js"></script>
+</body>
+
+</html>
