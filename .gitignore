@@ -38,7 +38,6 @@ build/
 ### Others ###
 *.log
 *.txt
-*.md
 
 ### PrintBloom Specific ###
 # User uploaded files
@@ -46,3 +45,16 @@ uploads/
 
 # Do not commit sensitive keys! Create an application-local.properties if needed.
 # For now, make sure you mask the keys in application.properties before pushing.
+application-local.properties
+
+
+deatailed_roadmap.md
+implementation_plan.md
+progress_tracker.txt
+project_working_nature.md
+run.log
+out.txt
+out2.txt
+run-3.log
+run-4.log
+compile.log

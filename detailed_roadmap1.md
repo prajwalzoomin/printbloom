@@ -1,0 +1,60 @@
+# PrintBloom: Unified Master Roadmap
+
+This document serves as the absolute, single source of truth for the entire **PrintBloom** project. It details every single module required to build the platform from the ground up, integrating PDF processing, local file storage, queuing logically, Razorpay checkout, and an interactive multi-page frontend.
+
+---
+
+## Part A: The Foundation (Completed ✅)
+These modules established the core Spring Boot backend architecture, enabling local file persistence and dynamic print-cost logic.
+
+### ✅ Module 1: Storage and Configuration
+- **Deep Explanation**: We needed a way for users to upload their physical documents to our server securely. We configured [application.properties](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/resources/application.properties) to connect to MySQL and set Spring Multipart limits (so users can't upload 500MB files and crash the server). We then built [FileStorageService](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/java/com/printbloom/service/FileStorageService.java#20-109) which takes incoming PDFs, validates their extensions, generates a completely unique UUID-based filename (preventing filename collisions if two users upload "assignment.pdf"), and writes them natively to an `/uploads` folder on the disk.
+
+### ✅ Module 2: PDF Processing & Pricing Logic
+- **Deep Explanation**: We had to determine how much to charge the user. We integrated the `Apache PDFBox` dependency. The [PdfProcessingService](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/java/com/printbloom/service/PdfProcessingService.java#33-76) reads the physical PDF file off the disk, parses its metadata, and securely extracts the *exact* page count while checking for corrupted files. The [CostCalculationService](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/java/com/printbloom/service/CostCalculationService.java#15-43) then takes this count and multiplies it by fixed rates (₹2 for Black & White, ₹5 for Color) to generate a dynamic estimate.
+
+### ✅ Module 3: Order Management & Database Persistence
+- **Deep Explanation**: Data needs to be permanent. We built a Spring Data JPA Repository ([PrintOrderRepository](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/java/com/printbloom/repository/PrintOrderRepository.java#20-35)) mapping to a MySQL table. The [PrintOrderService](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/java/com/printbloom/service/PrintOrderService.java#30-152) was built to act as the central brain—it takes the uploaded file, invokes the storage service, invokes the cost calculator, and saves a final [PrintOrder](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/java/com/printbloom/model/PrintOrder.java#22-185) record into the database with a default status of `PENDING`.
+
+### ✅ Module 4: Logical Waiting Queue
+- **Deep Explanation**: Users need to know how long they have to wait. We built the [QueueManagementService](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/java/com/printbloom/service/QueueManagementService.java#21-112). Instead of complex memory structures, it dynamically calculates queue position directly from the database by counting how many `PENDING` orders were created before the user's order. It translates this into an estimated wait time (e.g., 2 minutes per order ahead).
+
+### ✅ Module 5: REST Controller API Wiring
+- **Deep Explanation**: The physical backend services existed, but the outside world couldn't talk to them. We built standard Spring REST Controllers ([UploadController](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/java/com/printbloom/controller/UploadController.java#22-75), [PrintOrderController](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/java/com/printbloom/controller/PrintOrderController.java#26-110), [AdminController](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/java/com/printbloom/controller/AdminController.java#23-94)). These files expose URLs (like `POST /print/upload` or `GET /print/queue`) that accept JSON/FormData over HTTP, pass it to our Java services, and return standard JSON network responses.
+
+---
+
+## Part B: The Financial & Interactive Expansion (Pending ⏳)
+These upcoming modules expand the existing foundation by adding official Razorpay transactions and a clean, multi-page frontend interface. These are the current actionable tasks.
+
+*(Note: The [progress_tracker.txt](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/progress_tracker.txt) file in your main folder tracks exactly which of these to run next).*
+
+### ⏳ Module 6: Razorpay Dependency & Payment Entity Setup
+- **Deep Explanation**: Before processing money, the server needs Razorpay SDKs and a place to store receipts. You will inject `razorpay-java` into [pom.xml](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/pom.xml). You will then create a completely new Java Entity class called `Payment`. This entity will store critical Razorpay data: `razorpay_order_id` (the intention to pay), `razorpay_payment_id` (the actual receipt), and `razorpay_signature` (the cryptographic proof of payment). Finally, you map this `Payment` one-to-one to the existing [PrintOrder](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/java/com/printbloom/model/PrintOrder.java#22-185) entity.
+> **Prompt for Module 6:** "Implement Module 6: Add Razorpay dependency to pom.xml. Create a new model entity `Payment` with Razorpay fields (orderId, paymentId, signature, paymentStatus) and map it to [PrintOrder](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/java/com/printbloom/model/PrintOrder.java#22-185). Add placeholder Razorpay keys to application.properties and create a `RazorpayConfig` bean. Update progress_tracker.txt when done."
+
+### ⏳ Module 7: Core Razorpay API Integration Logic
+- **Deep Explanation**: You need business logic to actually speak to Razorpay's servers. You will build a single `RazorpayService`. It will have two massive responsibilities: 
+  1. **Order Generation**: Take our calculated PDF cost, convert it to paise (multiply by 100), and hit Razorpay's servers to generate an official Razorpay Order ID. 
+  2. **Signature Verification**: Execute an `HmacSHA256` hashing algorithm comparing the webhook secret to the payload signature to mathematically prove no one forged the payment.
+> **Prompt for Module 7:** "Implement Module 7: Create `RazorpayService`. Write a method calling RazorpayClient to create an order based on a Double cost value (convert cost to paise). Write a second method to verify the HmacSHA256 signature using the secret key. Update progress_tracker.txt when done."
+
+### ⏳ Module 8: Payment Gateway REST Controllers
+- **Deep Explanation**: The frontend needs a way to trigger the RazorpayService. You will build a `PaymentController` exposing two endpoints: `POST /payment/create-order` (which the frontend calls when the user clicks 'Pay Now') and `POST /payment/verify` (which the Razorpay frontend modal calls internally when the transaction completes successfully).
+> **Prompt for Module 8:** "Implement Module 8: Build `PaymentController.java` exposing `POST /payment/create-order` to generate Razorpay orders and `POST /payment/verify` to validate successful signatures. Update progress_tracker.txt when done."
+
+### ⏳ Module 9: Queue Isolation (Protecting Unpaid Orders)
+- **Deep Explanation**: Currently, any file uploaded goes straight to the queue. This is a vulnerability. We must rewrite parts of [PrintOrderService](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/java/com/printbloom/service/PrintOrderService.java#30-152) and [QueueManagementService](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/java/com/printbloom/service/QueueManagementService.java#21-112). The rule becomes: A PrintOrder is locked in a `AWAITING_PAYMENT` virtual state. It is ONLY factored into the actual live queue calculation when its associated `Payment` entity achieves a `SUCCESS` status in the database.
+> **Prompt for Module 9:** "Implement Module 9: Adjust [QueueManagementService](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/java/com/printbloom/service/QueueManagementService.java#21-112) so only PrintOrders with a successfully verified Payment are factored into the Queue count. Create an `AWAITING_PAYMENT` PrintStatus if needed. Update progress_tracker.txt when done."
+
+### ⏳ Module 10: Multi-Page Frontend: Upload Sequence
+- **Deep Explanation**: Shifting focus to the UI. The user starts at [upload.html](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/resources/static/upload.html). We will build [upload.js](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/resources/static/js/upload.js) which captures the PDF file input and the [PrintType](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/java/com/printbloom/model/PrintOrder.java#157-160), fires the physical `FormData` at our `/print/upload` API, retrieves the estimated cost and page count, temporarily saves these details into the browser's `sessionStorage`, and transitions the user to the checkout screen.
+> **Prompt for Module 10:** "Implement Module 10: Build the logic inside [upload.js](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/resources/static/js/upload.js). Listen for the file submission, POST it to `/print/upload`, save the resulting file name, ID, and estimated cost to browser `sessionStorage`, and programmatically redirect to [checkout.html](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/resources/static/checkout.html). Update progress_tracker.txt when done."
+
+### ⏳ Module 11: Multi-Page Frontend: Razorpay Checkout
+- **Deep Explanation**: The core financial screen. We will build [checkout.js](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/resources/static/js/checkout.js). This script retrieves the cost from `sessionStorage`, renders it, and natively initializes the Razorpay Embedded Checkout Script. When the user completes the card/UPI transaction in the injected modal, the script captures the Razorpay success payload and POSTs it straight back to our `/payment/verify` endpoint. Upon a 200 OK from our server, it redirects the user to the Live Queue.
+> **Prompt for Module 11:** "Implement Module 11: Build [checkout.js](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/resources/static/js/checkout.js). Read the uploaded details from sessionStorage. Ping `/payment/create-order` to fetch the razorpayOrderId, then inject Razorpay's checkout script. Hook the success handler to ping `/payment/verify`, then redirect to [queue.html](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/resources/static/queue.html) upon success. Update progress_tracker.txt when done."
+
+### ⏳ Module 12: Multi-Page Frontend: Live Queue & Admin Pollers
+- **Deep Explanation**: The final informative screens. We will complete [queue.js](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/resources/static/js/queue.js) to continuously poll (fetch) the active queue endpoint every 10 seconds, injecting live dynamic rows so the user can watch their physical document move up the pipeline. Simultaneously, we will build [admin.js](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/resources/static/js/admin.js) connected to [admin.html](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/resources/static/admin.html), giving staff members buttons to PUT status updates (`PRINTING`, `COMPLETED`), which instantly updates the database and reflects natively on the user screens.
+> **Prompt for Module 12:** "Implement Module 12: Build [queue.js](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/resources/static/js/queue.js) ensuring it fetches `/print/queue` and renders the active waiting layout. Then build [admin.js](file:///d:/NHCE/4th%20Sem/Mini%20Project/PrintBloom/src/main/resources/static/js/admin.js) to fetch and render all orders allowing staff to trigger status changes. Update progress_tracker.txt when done."
